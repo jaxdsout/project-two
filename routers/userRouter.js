@@ -1,15 +1,30 @@
-// ROOT IS "/user"
-
 const express = require('express');
 const router = express.Router();
 
-const { adminPage, contractorPage, indexPage } = require("../controllers/userController")
+const {
+    sendPINForm,
+    userLogin,
+    userLogout,
+    userHome,
+    createKlok
+} = require("../controllers/userController");
 
-router.get("/admin", adminPage) 
 
-router.get("/contractor", contractorPage)
+router.get("/", sendPINForm)
 
-router.get("/", indexPage)
+// --------------- USER LOGIN
 
+router.get("/user/login", sendPINForm)
+
+router.post("/user/login", userLogin)
+
+router.get("/user/logout", userLogout);
+
+router.get("/user/home/:id", userHome)
+
+
+// USER KLOK
+
+router.post("/user/home/:id/klok", createKlok)
 
 module.exports = router

@@ -1,0 +1,368 @@
+<div class="page-content">
+    <div id="admin-header">
+        <img src="https://i.ibb.co/QFrVfxR/New-Project.png" alt="Admin Dashboard">
+        <p><b><%= admin.organization %></b></p>
+        <p><%= admin.fullname %>, Welcome to your dashboard!</p>
+        <div id="admin-logout">
+            <button class="graybtn" onclick="window.location.href='/admin/logout'">LOGOUT</button>
+        </div>
+    </div>
+    <br>
+    <div class="tabbed">
+        <input type="radio" id="tab1" name="css-tabs" checked />
+        <input type="radio" id="tab2" name="css-tabs" />
+        <input type="radio" id="tab3" name="css-tabs" />
+        <input type="radio" id="tab4" name="css-tabs" />
+        <ul class="tabs">
+            <li class="tab"><label for="tab1">Summary</label></li>
+            <li class="tab"><label for="tab2">Users</label></li>
+            <li class="tab"><label for="tab3">Projects</label></li>
+            <li class="tab"><label for="tab4">Kloks</label></li>
+        </ul>
+
+
+    <div class="tab-content">
+        <div class="summaryTab">
+            <legend>USER SPECIFICS</legend>
+            <legend id="total">Total Users: <span id="total-num"><%= admin.users.length %></span></legend>
+            <ul>
+            <% users.forEach((user, index) => { %>
+                <% let userEarnings = 0%>
+                <% let userHours = 0 %>
+                <% const kloks = user.kloks %>
+                <% kloks.forEach((klok) => { %>
+                    <% userHours += klok.hours %>
+                    <% userEarnings += klok.hours * user.hourlyPay %>
+                <% }) %>
+                <li>
+                    <div class="userStats">
+                    <b><%= user.fullname %></b>
+                    <label for="view-user-<%= index %>" class="etoggle"> EXPAND </label>
+                    <input type="checkbox" name="view-user" id="view-user-<%= index %>" class="hide-input">
+                    <div class="etoggle-el">
+                        <div class="viewUserContainer-<%= index %>">
+                            <ul>
+                                <li><span>Total Hours: <%= userHours %> </span> </li>
+                                <li><span>Hourly Rate: $<%= user.hourlyPay %></span></li>
+                                <li><span>Total Earnings: <b>$<%= userEarnings %></b></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                </li>
+            <% }) %>
+            </ul>
+            <legend>PROJECT SPECIFICS</legend>
+            <legend id="total">Total Projects: <span id="total-num"><%= admin.projects.length %></span></legend>
+            <ul>
+                <% let projectHours = {}; %>
+                <% admin.kloks.forEach((klok) => { %>
+                        <% const project = klok.project; %>
+                        <% if (!projectHours[project]) { %>
+                            <% projectHours[project] = 0; %>
+                        <% } %>
+                        <% projectHours[project] += klok.hours; %>
+                <% }) %>
+                <% admin.projects.forEach((project, index) => { %>
+                    <li>
+                        <div class="projectStats">
+                            <b><%= project.name %> </b>
+                            <label for="view-project-<%= index %>" class="etoggle"> EXPAND </label>
+                            <input type="checkbox" name="view-project" id="view-project-<%= index %>" class="hide-input">
+                            <div class="etoggle-el">
+                                <div id="viewProjectContainer-<%= index %>">
+                                    <ul>
+                                        <li><span>TOTAL : <%= projectHours[project.name] %> hours </span></li>
+                                        <li> HOURS PER USER:</li>
+                                        <% let userProjectHours = {} %>
+                                        <% admin.kloks.forEach((klok) => { %>
+                                        <% if (klok.project === project.name) { %>
+                                            <% const user = klok.user %>
+                                            <% if (!userProjectHours[user]) { %>
+                                                <% userProjectHours[user] = 0 %>
+                                            <% } %>
+                                            <% userProjectHours[user] += klok.hours %>
+                                        <% } %>
+                                        <% }) %>
+                                        <ul>
+                                        <% for (const user in userProjectHours) { %>
+                                            <li><b><%= user %></b> <span>: <%= userProjectHours[user] %> hours</span></li>
+                                        <% } %>
+                                    </ul>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>     
+                    </li>
+                 <% }) %>
+                </ul>
+            <legend>KLOK SPECIFICS</legend>
+            <legend id="total">Total Kloks: <span id="total-num"><%= admin.kloks.length %></span></legend>
+            <% let klokHours = 0; %>
+            <% admin.kloks.forEach((klok) => { %>
+            <% klokHours += klok.hours %>
+            <% }) %>
+            <legend id="total">Total Man-Hours Kloked: <span id="total-num"><%= klokHours %></span></legend>
+        </div>
+    </div>
+
+
+    <div class="tab-content">
+        <div class="newUser">
+            <label for="add-user" class="toggle">+ USER</label>
+            <input type="checkbox" name="add-user" id="add-user" class="hide-input">
+            <div class="toggle-el">
+                <legend>NEW USER</legend>
+                <br>
+                <form class="createUser" method="POST" action="/admin/new-user">
+                    <p>
+                        <label for="username">Username:</label>
+                        <input class="input" id="username" type="text" name="username" required="true"/>
+                    </p><p>
+                        <label for="PIN">PIN:</label>
+                        <input class="input" id="PIN" type="text" name="PIN" maxlength="5" required="true"/>
+                    </p><p>
+                        <label for="fullmame">Full Name:</label>
+                        <input class="input" id="fullname" type="text" name="fullname" required="true"/>
+                    </p><p>
+                        <label for="startDate">Start Date:</label>
+                        <input class="input" id="startDate" type="date" name="startDate" required="true"/>
+                    </p><p>
+                        <label for="position">Position:</label>
+                        <input class="input" id="position" type="text" name="position" required="true"/>
+                    </p><p>
+                        <label for="hourlyPay">Hourly Rate:</label>
+                        <input class="input" id="hourlyPay" type="number" name="hourlyPay" required="true"/>
+                        </p><p></p>
+                        <button class="graybtn" type="submit">ADD USER</button>
+                </form>
+                <br>
+            </div>
+        </div>
+        <div class="allUsers">
+            <legend>ALL USERS</legend>
+            <ul>
+                <% users.forEach((user, index) => { %>
+                    <li>
+                    <%= user.fullname %> 
+                <label for="edit-user-<%= index %>" class="etoggle">EDIT</label>
+                <input type="checkbox" name="edit-user" id="edit-user-<%= index %>" class="hide-input">
+                <div class="etoggle-el">
+                    <div id="editUserContainer-<%= index %>">
+                        <h4>EDIT USER</h4>
+                        <hr>
+                        <form class="editUser" method="POST" action="/admin/edit-user/<%= user.id %>?_method=PUT">
+                            <p>
+                                <label for="username">Username:</label>
+                                <input class="input" id="username" type="text" name="username" value="<%= user.username %>" required="true"/>
+                            </p><p>
+                                <label for="PIN">PIN:</label>
+                                <input class="input" id="PIN" type="text" name="PIN" value="<%= user.PIN %>" required="true"/>
+                            </p><p>
+                                <label for="fullmame">Full Name:</label>
+                                <input class="input" id="fullname" type="text" name="fullname" value="<%= user.fullname %>" required="true"/>
+                            </p><p>
+                                <label for="startDate">Start Date:</label>
+                                <input class="input" id="startDate" type="text" name="startDate" value="<%= user.startDate %>" required="true"/>
+                            </p><p>
+                                <label for="position">Position:</label>
+                                <input class="input" id="position" type="text" name="position" value="<%= user.position %>" required="true"/>
+                            </p><p>
+                                <label for="hourlyPay">Hourly Rate:</label>
+                                <input class="input" id="hourlyPay" type="number" name="hourlyPay" value="<%= user.hourlyPay %>" required="true"/>
+                            </p><p>
+                                <input type="hidden" name="userID" value="<%= user.id %>">
+                                <p></p>
+                                <button class="grayBG" type="submit">SAVE</button>
+                            </p>
+                        </form>
+                    </div>
+                    <div id="deleteUserContainer-<%= index %>">
+                        <h4>DELETE USER</h4>
+                        <hr>
+                        <form class="deleteUser" method="POST" action="/admin/edit-user/<%= user.id %>/delete?_method=DELETE">
+                            <input type="hidden" name="userID" value="<%= user.id %>">    
+                            <button class="grayBG" type="submit">DELETE</button>
+                        </form>
+                    </div>
+                </div>
+                    </li>
+                <% }) %>
+                <br>
+
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="tab-content">
+        <div class="newProject">
+            <label for="item-3" class="toggle">+ PROJECT</label>
+            <input type="checkbox" name="one" id="item-3" class="hide-input">
+            <div class="toggle-el">
+                <legend> NEW PROJECT</legend>
+                <br>
+                <form class="createProject" method="POST" action="/admin/new-project">
+                    <p>
+                        <label for="name">Name:</label>
+                        <input id="name" type="text" name="name" required="true"/>
+                    </p><p>
+                        <label for="location">Location:</label>
+                        <input id="location" type="text" name="location" required="true"/>
+                    </p><p>
+                    <label for="projectStart">Start Date:</label>
+                    <input id="projectStart" type="date" name="projectStart" required="true"/>
+                    </p><p>
+                    <label for="active">Active:</label>
+                    <input id="active" type="checkbox" name="active"/>
+                    </p><p><label for="projectType">Project Type:</label>
+                    <input id="projectType" type="text" name="projectType" required="true"/>
+                    </p><p>
+                    <button class="graybtn" type="submit">ADD PROJECT</button></p>
+                    <br>
+                </form>
+            </div> 
+        </div>
+        <div class="allProjects">
+            <legend>ALL PROJECTS</legend>
+            <ul>
+                <% admin.projects.forEach((project, index) => { %>
+                <li>
+                <%= project.name %> 
+                <label for="edit-project-<%= index %>" class="etoggle">EDIT</label>
+                <input type="checkbox" name="edit-project" id="edit-project-<%= index %>" class="hide-input">
+                <div class="etoggle-el">
+                    <div id="editProjectContainer-<%= index %>">
+                        <h4>EDIT PROJECT</h4>
+                        <hr>
+                        <form class="editProject" method="POST" action="/admin/edit-project/<%= project.id %>?_method=PUT">
+                            <p>
+                                <label for="name">Name:</label>
+                                <input class="input" id="name" type="text" name="name" value="<%= project.name %>" required="true"/>
+                            </p><p>
+                                <label for="location">Location:</label>
+                                <input class="input" id="location" type="text" name="location" value="<%= project.location %>" required="true"/>
+                            </p><p>
+                                <label for="projectStart">Start Date:</label>
+                                <input class="input" id="projectStart" type="date" name="projectStart" value="<%= project.projectStart %>" required="true"/>
+                            </p><p>
+                                <label for="active">Active:</label>
+                                <input class="input" id="active" type="checkbox" name="active" value="<%= project.active %>"/>
+                            </p><p>
+                                <label for="projectType">Project Type:</label>
+                                <input class="input" id="projectType" type="text" name="projectType" value="<%= project.projectType %>" required="true"/>
+                            </p><p>
+                                <input type="hidden" name="projectID" value="<%= project.id %>">    
+                                <button class="grayBG" type="submit">Save</button>
+                            </p>
+                        </form>
+                    </div>
+                    <div id="deleteProjectContainer-<%= index %>">
+                        <h4>DELETE PROJECT</h4>
+                        <hr>
+                        <form class="deleteUser" method="POST" action="/admin/edit-project/<%= project.id %>/delete?_method=DELETE">
+                                <input type="hidden" name="projectID" value="<%= project.id %>">    
+                                <button class="grayBG" type="submit">DELETE</button>
+                        </form>
+                    </div>
+                </div>
+                </li>
+                <% }) %>
+            </ul>
+        </div>  
+    </div>
+
+
+    <div class="tab-content">
+        <div class="newKlok">
+            <label for="item-4" class="toggle">+ KLOK</label>
+            <input type="checkbox" name="one" id="item-4" class="hide-input">
+            <div class="toggle-el">
+                <legend>NEW KLOK</legend>
+                <br>
+                <form class="createKlok" method="POST" action="/admin/new-klok">
+                    <p>
+                        <label for="user">User:</label>
+                        <select name="user" id="user" required="true">
+                            <% users.forEach((user) => { %>
+                                <option value="<%= user.fullname %>">
+                                    <%= user.fullname %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </p><p>
+                        <label for="project">Project:</label>
+                        <select name="project" id="project" required="true">
+                            <% admin.projects.forEach((project) => { %>
+                                <option value="<%= project.name %>">
+                                    <%= project.name %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </p><p> 
+                        <label for="date">Date:</label>
+                        <input id="date" type="date" name="date" required="true"/>
+                    </p><p>
+                        <label for="description">Description:</label>
+                        <input id="description" type="text" name="description" required="true"/>
+                    </p><p>
+                        <label for="hours">Hours:</label>
+                        <input id="hours" type="number" name="hours" required="true"/>
+                    </p><p>
+                        <button class="graybtn" type="submit">ADD KLOK</button>
+                    </p>
+                    <br>
+                </form>
+            </div>
+        </div>
+        <div class="allKloks" id="klokkieBox">
+            <legend>ALL KLOKS</legend>
+            <ul>
+                <% klokkies.forEach((klokkie, index) => { %>
+                <li>
+                    <%= klokkie.user %>
+                    <%= klokkie.date %>
+                    <%= klokkie.project %>
+                    <label for="edit-klok-<%= index %>" class="etoggle">EDIT</label>
+                    <input type="checkbox" name="edit-klok" id="edit-klok-<%= index %>" class="hide-input">
+                    <div class="etoggle-el">
+                        <div id="editKlokContainer-<%= index %>">
+                            <h4>EDIT KLOK</h4>
+                            <hr>
+                            <form class="editProject" method="POST" action="/admin/edit-klok/<%= klokkie.id %>?_method=PUT">
+                                <p>
+                                    <label for="user">User:</label>
+                                    <input class="input" id="user" type="text" name="user" value="<%= klokkie.user %>" required="true"/>
+                                </p><p>
+                                    <label for="project">Project:</label>
+                                    <input class="input" id="project" type="text" name="project" value="<%= klokkie.project %>" required="true"/>
+                                </p><p>
+                                    <label for="date">Date:</label>
+                                    <input class="input" id="date" type="date" name="date" value="<%= klokkie.date %>" required="true"/>
+                                </p><p>
+                                    <label for="description">Description:</label>
+                                    <input class="input" id="description" type="text" name="description" value="<%= klokkie.description %>" required="true"/>
+                                </p><p>
+                                    <label for="hours">Hours:</label>
+                                    <input class="input" id="hours" type="numbers" name="hours" value="<%= klokkie.hours %>" required="true"/>
+                                </p><p>
+                                    <input type="hidden" name="klokkieID" value="<%= klokkie.id %>">    
+                                    <button class="grayBG" type="submit">SAVE</button>
+                                </p>
+                            </form>
+                        </div>
+                        <div class="deleteKlokContainer-<%= index %>">
+                            <h4>DELETE KLOK</h4>
+                            <hr>
+                            <form class="deleteKlok" method="POST" action="/admin/edit-klok/<%= klokkie.id %>/delete?_method=DELETE">
+                                    <input type="hidden" name="klokkieID" value="<%= klokkie.id %>">    
+                                    <button class="grayBG" type="submit">DELETE</button>
+                            </form>
+                        </div>
+                    </div>
+                    </li>
+                <% }) %>
+            </ul> 
+        </div>
+    </div>
+</div>
